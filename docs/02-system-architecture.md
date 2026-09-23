@@ -39,10 +39,10 @@ Read paths may use specialized SQL projections for standings. These remain behin
 ## Module boundaries
 
 - **Identity and participation:** authentication, sessions, permissions, participation confirmation.
-- **Competition management:** competitions, teams/groups, matchdays, matches, status, and deadlines.
+- **Competition management:** competitions, teams, tournament groups, matchdays, matches, status, and deadlines.
 - **Predictions:** entry, update, copy, normalization, and eligibility.
 - **Results and scoring:** official results, rule-version selection, classification, and awards.
-- **Rankings:** general and scoped tables, current user, nearby threat, potential scores.
+- **Rankings:** general, matchday, tournament-group, and private participant-group tables; current user; nearby threat; potential scores.
 - **Simulation:** scenario overlays and projected standings.
 - **Communications:** consent-aware newsletter/notification preparation.
 - **Administration:** authorized orchestration over the same domain services.

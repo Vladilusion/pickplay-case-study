@@ -6,7 +6,7 @@ PickPlay is a full-stack sports prediction and competition-management applicatio
 
 ## Problem and users
 
-A prediction competition needs more than a score form. Participants require a clear open/locked state, fast updates, standings they can understand, and ways to compare or explore outcomes. Administrators need controlled competition setup, schedules, official results, teams/groups, closing instants, and communications. Every view must resolve to the same scoring policy and competition scope.
+A prediction competition needs more than a score form. Participants require a clear open/locked state, fast updates, standings they can understand, and ways to compare or explore outcomes. Administrators need controlled competition setup, schedules, official results, teams, tournament groups, closing instants, and communications. Every view must resolve to the same scoring policy and competition scope.
 
 ## Conceptual capabilities
 
@@ -16,13 +16,13 @@ A prediction competition needs more than a score form. Participants require a cl
 - Confirm participation and create or update predictions while a match is open.
 - Copy eligible predictions as a deliberate, authorized action.
 - Review match status, consolidated results, awarded points, and current position.
-- Compare general, matchday, team/group, relationship/private-group, and nearby-player standings.
+- Compare general, matchday, tournament-group, relationship/private-group, and nearby-player standings.
 - Explore projected results without changing official records.
 - Receive competition communications or newsletters according to consent preferences.
 
 ### Administration
 
-- Configure competitions, matchdays, teams, groups, scoring-rule versions, and closing times.
+- Configure competitions, matchdays, teams, tournament groups, scoring-rule versions, and closing times.
 - Manage match status transitions and record official results.
 - Control roles and access to operational actions.
 - Reconcile participation, scoring, and ranking outputs through audit-friendly records.

@@ -19,8 +19,8 @@ The illustrative query uses `DENSE_RANK()`: totals `12, 12, 9` receive positions
 
 - **General:** all eligible finalized matches in a competition.
 - **Matchday:** general filters plus one matchday.
-- **Team/group:** matches or participants associated with the relevant competition grouping.
-- **Relationship/private group:** general result set intersected with authorized membership.
+- **Tournament/competition group:** restrict eligible matches to teams assigned through `team_group_memberships`; the ranked participant population remains defined by the competition's participation rules.
+- **Relationship/private group:** keep the competition or matchday match scope, but restrict the ranked participant population through `private_group_memberships` after authorizing access to that private group.
 - **Current user:** locate the authenticated user's row after the complete scoped ranking is calculated.
 
 Filters must occur before ranking. Filtering a globally ranked result afterward yields positions from the wrong population.
@@ -35,8 +35,8 @@ For unresolved matches, potential can mean either maximum achievable remaining p
 
 ## Query design
 
-[`samples/ranking-query.sql`](../samples/ranking-query.sql) demonstrates CTEs, conditional aggregation, `DENSE_RANK()`, parameter placeholders, and stable ordering for MySQL 8+. Important indexes cover prediction uniqueness, match scope/status, and group membership. Validate the plan with `EXPLAIN ANALYZE` against representative sanitized distributions before deciding to materialize results.
+[`samples/ranking-query.sql`](../samples/ranking-query.sql) specifically demonstrates a **private-group ranking**: private membership chooses the users, while competition and optional matchday filters choose the matches. A tournament-group ranking would instead join `team_group_memberships` and retain matches involving teams in the selected `competition_group`; it would not use private membership to select participants. The sample uses CTEs, `DENSE_RANK()`, parameter placeholders, and stable ordering for MySQL 8+. Important indexes cover prediction uniqueness, match scope/status, and private-group membership. Validate the plan with `EXPLAIN ANALYZE` against representative sanitized distributions before deciding to materialize results.
 
 ## Refresh and correctness
 
-Rankings may be computed on demand, cached, or materialized. On-demand calculations are simple but can become expensive. Cached or snapshot results need invalidation/versioning after official result, scoring-rule, prediction eligibility, or group-membership changes. Idempotent recomputation and a visible `calculated_at` value make stale data diagnosable.
+Rankings may be computed on demand, cached, or materialized. On-demand calculations are simple but can become expensive. Cached or snapshot results need invalidation/versioning after official result, scoring-rule, prediction eligibility, team-to-competition-group, or private-group membership changes. Idempotent recomputation and a visible `calculated_at` value make stale data diagnosable.

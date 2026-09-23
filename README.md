@@ -13,7 +13,7 @@
 
 ## What is PickPlay?
 
-PickPlay is a modular web application for running sports-prediction competitions. Participants submit or update score predictions before a match closes; the application evaluates official results with configurable scoring rules and builds general, matchday, team/group, and private-group standings. It also supports scenario simulation without changing official data.
+PickPlay is a modular web application for running sports-prediction competitions. Participants submit or update score predictions before a match closes; the application evaluates official results with configurable scoring rules and builds general, matchday, tournament-group, and private participant-group standings. It also supports scenario simulation without changing official data.
 
 The engineering problem is broader than collecting two scores: the system must enforce time-dependent eligibility, produce deterministic points, rank tied participants consistently, scope data to the correct competition, and preserve an auditable boundary between hypothetical and official results.
 
@@ -22,9 +22,9 @@ The engineering problem is broader than collecting two scores: the system must e
 | Area | Responsibilities |
 |---|---|
 | Participation | Authentication, login, participation confirmation, prediction entry/update, and copy-prediction workflows |
-| Competition lifecycle | Competition setup, teams and groups, matchdays, match status, and closing times |
+| Competition lifecycle | Competition setup, teams, tournament groups, matchdays, match status, and closing times |
 | Results | Consolidated official results and centralized scoring |
-| Rankings | General, matchday, team/group, relationship/private-group, current-position, and nearby “threat” views |
+| Rankings | General, matchday, tournament-group, relationship/private-group, current-position, and nearby “threat” views |
 | Exploration | Non-destructive result simulation and potential-score analysis |
 | Operations | Administration, permissions, session handling, and newsletter/communications support |
 | Experience | Responsive HTML/CSS, JavaScript validation, and AJAX-style asynchronous interactions |
@@ -53,9 +53,11 @@ flowchart LR
     A[Prediction] --> B[Normalize and validate]
     B --> C{Before close?}
     C -- No --> X[Reject]
-    C -- Yes --> D[(Persist atomically)]
-    D --> E[Official result recorded]
-    E --> F[Central scoring engine]
+    C -- Yes --> D[(Eligible prediction persisted atomically)]
+    D --> J{Prediction and finalized result available?}
+    E[Finalized official result] --> J
+    J -- Yes --> F[Central scoring engine]
+    J -- No --> W[Wait without scoring]
     F --> G[Ranking projection / query]
 ```
 

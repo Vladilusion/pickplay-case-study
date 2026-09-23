@@ -9,7 +9,13 @@ erDiagram
     USERS ||--o{ PREDICTIONS : submits
     COMPETITIONS ||--o{ MATCHDAYS : contains
     COMPETITIONS ||--o{ TEAMS : registers
-    COMPETITIONS ||--o{ GROUPS : organizes
+    COMPETITIONS ||--o{ COMPETITION_GROUPS : organizes
+    COMPETITION_GROUPS ||--o{ TEAM_GROUP_MEMBERSHIPS : contains
+    TEAMS ||--o{ TEAM_GROUP_MEMBERSHIPS : assigned_to
+    COMPETITIONS ||--o{ PRIVATE_GROUPS : scopes
+    USERS ||--o{ PRIVATE_GROUPS : owns
+    PRIVATE_GROUPS ||--o{ PRIVATE_GROUP_MEMBERSHIPS : contains
+    USERS ||--o{ PRIVATE_GROUP_MEMBERSHIPS : joins
     MATCHDAYS ||--o{ MATCHES : schedules
     TEAMS ||--o{ MATCHES : plays
     MATCHES ||--o{ PREDICTIONS : receives
@@ -17,9 +23,16 @@ erDiagram
     COMPETITIONS ||--o{ SCORING_RULES : versions
     USERS ||--o{ RANKINGS : appears_in
     COMPETITIONS ||--o{ RANKINGS : scopes
+    COMPETITION_GROUPS ||--o{ RANKINGS : may_scope
+    PRIVATE_GROUPS ||--o{ RANKINGS : may_scope
 ```
 
-`groups` can represent competition/team groupings; private ranking membership may be modeled with separate `private_groups` and membership junctions in a fuller schema.
+The model deliberately separates two meanings of “group”:
+
+- `competition_groups` organize **teams** inside a tournament (for example, Group A). `team_group_memberships` is the team-to-group junction.
+- `private_groups` organize **participants** who compare private standings. `private_group_memberships` is the user-to-group junction.
+
+Neither concept substitutes for the other: a tournament-group ranking scopes matches by participating teams, while a private-group ranking scopes the participant population by membership.
 
 ## Entity catalog
 
@@ -28,11 +41,14 @@ erDiagram
 | `users` | `id` | unique normalized email; status; password hash; audit timestamps |
 | `competitions` | `id` | unique slug; name; timezone/display configuration; lifecycle timestamps |
 | `teams` | `id` | FK `competition_id`; unique `(competition_id, code)` |
-| `groups` | `id` | FK `competition_id`; unique `(competition_id, name)` |
+| `competition_groups` | `id` | FK `competition_id`; unique tournament-group name within a competition |
+| `team_group_memberships` | `(competition_group_id, team_id)` | FKs to tournament group and team; assigns teams to competition groups |
+| `private_groups` | `id` | FKs `competition_id`, `owner_user_id`; private participant-ranking scope |
+| `private_group_memberships` | `(private_group_id, user_id)` | FKs to private group and user; records participant membership |
 | `matchdays` | `id` | FK `competition_id`; unique sequence within competition; start/end instants |
 | `matches` | `id` | FKs to matchday, home team, away team; kickoff, close, status, official scores |
 | `predictions` | `id` | FKs `user_id`, `match_id`; unique pair; submitted/updated timestamps |
-| `prediction_details` | `id` | FK `prediction_id`; predicted scores, wildcard choice, awarded values |
+| `prediction_details` | `prediction_id` | PK and FK to `predictions.id`; predicted scores, wildcard choice, and awarded values in a 1:1 relationship |
 | `scoring_rules` | `id` | FK `competition_id`; version and effective interval; point configuration |
 | `rankings` | `id` | optional materialized snapshot keyed by scope, user, and calculation version |
 
@@ -44,6 +60,8 @@ Rankings can instead remain a query/read model. If snapshots are stored, they ar
 - Enforce `home_team_id <> away_team_id`, non-negative scores, and valid status values with application checks plus database `CHECK` constraints where supported.
 - Enforce one prediction with `UNIQUE (user_id, match_id)`; use an upsert only after authorization and deadline validation.
 - Make team codes and matchday numbers unique **within** a competition, not globally.
+- Ensure team/group relationships remain in one competition. Composite foreign keys can enforce this in a fuller schema; the sample calls out the transaction-level check explicitly.
+- Keep tournament team membership and private participant membership in separate junction tables with composite primary keys that prevent duplicates.
 - Store `kickoff_at`, `closes_at`, `submitted_at`, `updated_at`, `finalized_at`, and `calculated_at` as UTC instants. Preserve the user-facing timezone in competition configuration.
 - Version scoring rules rather than silently editing policy after awards exist. Prevent overlapping effective ranges by transaction/application checks if the database cannot express them directly.
 - Audit administrator changes with actor, action, resource, before/after representation or diff, and timestamp, subject to privacy and retention policy.
@@ -58,7 +76,8 @@ Rankings can instead remain a query/read model. If snapshots are stored, they ar
 | `predictions (user_id, match_id)` | participant history; the unique index may already cover this order |
 | `matchdays (competition_id, sequence_no)` unique | ordered competition navigation |
 | `scoring_rules (competition_id, effective_from, effective_to)` | effective-rule selection |
-| group-membership junction `(group_id, user_id)` unique and reverse `(user_id, group_id)` | scoped rankings and membership checks |
+| `team_group_memberships (competition_group_id, team_id)` primary and reverse `(team_id, competition_group_id)` | tournament-group match filtering |
+| `private_group_memberships (private_group_id, user_id)` primary and reverse `(user_id, private_group_id)` | private ranking scope and authorization |
 
 Indexes should be confirmed with realistic query plans and representative, sanitized data; extra indexes increase write and storage cost.
 

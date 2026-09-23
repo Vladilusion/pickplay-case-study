@@ -1,13 +1,16 @@
 -- Illustrative MySQL 8.0+ query. CTEs and DENSE_RANK() require MySQL 8.
 -- Named :parameters represent prepared-statement values; never interpolate them.
--- This example ranks eligible members of one competition group for a matchday.
+-- This example is a PRIVATE-GROUP ranking. Private-group membership chooses the
+-- participant population; competition and optional matchday parameters choose
+-- the finalized matches. Tournament groups contain teams and are not used here.
+-- The caller must authorize :private_group_id before executing this query.
 
 WITH eligible_users AS (
-    SELECT gm.user_id
-    FROM group_memberships AS gm
-    JOIN competition_groups AS cg ON cg.id = gm.group_id
-    WHERE gm.group_id = :group_id
-      AND cg.competition_id = :competition_id
+    SELECT pgm.user_id
+    FROM private_group_memberships AS pgm
+    JOIN private_groups AS pg ON pg.id = pgm.private_group_id
+    WHERE pgm.private_group_id = :private_group_id
+      AND pg.competition_id = :competition_id
 ),
 scoped_awards AS (
     SELECT p.user_id, pd.awarded_units

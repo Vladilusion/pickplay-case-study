@@ -40,21 +40,48 @@ CREATE TABLE competition_groups (
     competition_id BIGINT UNSIGNED NOT NULL,
     name VARCHAR(100) NOT NULL,
     created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    CONSTRAINT fk_groups_competition FOREIGN KEY (competition_id)
+    CONSTRAINT fk_competition_groups_competition FOREIGN KEY (competition_id)
         REFERENCES competitions (id) ON DELETE RESTRICT,
-    CONSTRAINT uq_groups_competition_name UNIQUE (competition_id, name)
+    CONSTRAINT uq_competition_groups_name UNIQUE (competition_id, name)
 ) ENGINE = InnoDB;
 
-CREATE TABLE group_memberships (
-    group_id BIGINT UNSIGNED NOT NULL,
+-- Tournament groups contain teams, not participant accounts.
+CREATE TABLE team_group_memberships (
+    competition_group_id BIGINT UNSIGNED NOT NULL,
+    team_id BIGINT UNSIGNED NOT NULL,
+    assigned_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (competition_group_id, team_id),
+    CONSTRAINT fk_team_group_memberships_group FOREIGN KEY (competition_group_id)
+        REFERENCES competition_groups (id) ON DELETE CASCADE,
+    CONSTRAINT fk_team_group_memberships_team FOREIGN KEY (team_id)
+        REFERENCES teams (id) ON DELETE RESTRICT,
+    INDEX ix_team_group_memberships_team (team_id, competition_group_id)
+) ENGINE = InnoDB;
+
+-- Private groups contain users for relationship/private ranking views.
+CREATE TABLE private_groups (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    competition_id BIGINT UNSIGNED NOT NULL,
+    owner_user_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_private_groups_competition FOREIGN KEY (competition_id)
+        REFERENCES competitions (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_private_groups_owner FOREIGN KEY (owner_user_id)
+        REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT uq_private_groups_name UNIQUE (competition_id, owner_user_id, name)
+) ENGINE = InnoDB;
+
+CREATE TABLE private_group_memberships (
+    private_group_id BIGINT UNSIGNED NOT NULL,
     user_id BIGINT UNSIGNED NOT NULL,
     joined_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    PRIMARY KEY (group_id, user_id),
-    CONSTRAINT fk_memberships_group FOREIGN KEY (group_id)
-        REFERENCES competition_groups (id) ON DELETE CASCADE,
-    CONSTRAINT fk_memberships_user FOREIGN KEY (user_id)
+    PRIMARY KEY (private_group_id, user_id),
+    CONSTRAINT fk_private_group_memberships_group FOREIGN KEY (private_group_id)
+        REFERENCES private_groups (id) ON DELETE CASCADE,
+    CONSTRAINT fk_private_group_memberships_user FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE RESTRICT,
-    INDEX ix_memberships_user_group (user_id, group_id)
+    INDEX ix_private_group_memberships_user (user_id, private_group_id)
 ) ENGINE = InnoDB;
 
 CREATE TABLE matchdays (
@@ -160,7 +187,8 @@ CREATE TABLE rankings (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     competition_id BIGINT UNSIGNED NOT NULL,
     matchday_id BIGINT UNSIGNED NULL,
-    group_id BIGINT UNSIGNED NULL,
+    competition_group_id BIGINT UNSIGNED NULL,
+    private_group_id BIGINT UNSIGNED NULL,
     user_id BIGINT UNSIGNED NOT NULL,
     scope_key VARCHAR(120) NOT NULL,
     total_units INT UNSIGNED NOT NULL,
@@ -171,16 +199,23 @@ CREATE TABLE rankings (
         REFERENCES competitions (id) ON DELETE CASCADE,
     CONSTRAINT fk_rankings_matchday FOREIGN KEY (matchday_id)
         REFERENCES matchdays (id) ON DELETE CASCADE,
-    CONSTRAINT fk_rankings_group FOREIGN KEY (group_id)
+    CONSTRAINT fk_rankings_competition_group FOREIGN KEY (competition_group_id)
         REFERENCES competition_groups (id) ON DELETE CASCADE,
+    CONSTRAINT fk_rankings_private_group FOREIGN KEY (private_group_id)
+        REFERENCES private_groups (id) ON DELETE CASCADE,
     CONSTRAINT fk_rankings_user FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE RESTRICT,
     CONSTRAINT uq_rankings_snapshot UNIQUE
         (competition_id, scope_key, user_id, source_version),
+    CONSTRAINT ck_rankings_single_group_scope CHECK (
+        competition_group_id IS NULL OR private_group_id IS NULL
+    ),
     INDEX ix_rankings_display
         (competition_id, scope_key, source_version, position_no, user_id)
 ) ENGINE = InnoDB;
 
--- Cross-table rules (for example, ensuring both teams belong to the matchday's
--- competition and effective scoring periods do not overlap) require guarded
--- application transactions or database triggers beyond these local checks.
+-- Cross-table rules (for example, ensuring team-group and private-group members
+-- belong to the referenced competition, both match teams belong to the
+-- matchday's competition, and effective scoring periods do not overlap) require
+-- guarded application transactions, composite foreign keys, or database
+-- triggers beyond these local checks.
