@@ -1,0 +1,42 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*
+secrets*
+
+# Dependencies and build artifacts
+/vendor/
+/node_modules/
+/dist/
+/build/
+
+# Logs, coverage, and caches
+*.log
+/logs/
+/coverage/
+/.cache/
+/.phpunit.result.cache
+
+# Local databases and dumps
+*.sql.gz
+*.dump
+*.bak
+*.sqlite
+*.sqlite3
+/backups/
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# IDE and OS metadata
+/.idea/
+/.vscode/
+*.swp
+.DS_Store
+Thumbs.db
