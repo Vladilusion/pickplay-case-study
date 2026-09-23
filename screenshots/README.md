@@ -1,13 +1,31 @@
-# Screenshot plan
+# Product screenshot inventory
 
-No fabricated application screenshots are included. Future images should be captured from an approved demonstration environment with synthetic data, reviewed for personal information and secrets, and accompanied by concise alt text and capture context.
+The images in this directory are actual sanitized portfolio captures of PickPlay product workflows. They are included as visual evidence for this public engineering case study and do not expose production credentials, secrets, or private user data.
 
-Planned filenames:
+## Screenshots
 
-- `prediction-entry-desktop.png` — open/locked states, closing time, inputs, and confirmation on a desktop viewport.
-- `prediction-entry-mobile.png` — the same workflow at a representative narrow viewport.
-- `ranking-dashboard.png` — scope selector, tie presentation, current participant, and nearby comparison.
-- `simulation-view.png` — hypothetical result controls and clearly labelled projected ranking.
-- `administration-view.png` — sanitized competition and match configuration workflow.
+### `prediction-dashboard-mobile.png`
 
-Before committing an image, remove real names, email addresses, tokens, URLs containing private identifiers, browser extensions, notifications, and production hostnames. Prefer lossless PNG, crop to the relevant UI, optimize file size without harming legibility, and document whether the interface is current or illustrative.
+Mobile prediction-entry dashboard showing competition selection, pool selection, dynamic match filters, wildcard guidance, and responsive interaction patterns.
+
+### `sealed-predictions-mobile.png`
+
+Finalized match cards showing sealed predictions, official scores, awarded points, match status, and wildcard indicators.
+
+### `ranking-general-mobile.png`
+
+Anonymized general ranking view showing participant positions, accumulated points, prediction summaries, multipliers, and leaderboard presentation.
+
+### `administration-menu-mobile.png`
+
+Navigation and administration menu showing operational areas such as ranking, matchdays, groups, reports, maintenance, and administration.
+
+### `match-maintenance-mobile.png`
+
+Administrative match-maintenance screen showing competition filtering, matchday enable/disable controls, operational statistics, and match-management controls.
+
+## Publication notes
+
+- The captures use sanitized or illustrative participant labels where participant information is visible.
+- No production credentials, private user data, tokens, private URLs, notifications, or production configuration are shown.
+- The PNG files are preserved as supplied; they have not been recreated, redrawn, restyled, or otherwise altered for this repository.

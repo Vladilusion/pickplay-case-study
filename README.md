@@ -61,6 +61,33 @@ flowchart LR
     F --> G[Ranking projection / query]
 ```
 
+## Product Screens
+
+These sanitized portfolio captures illustrate representative mobile participant and administrative workflows. They contain no production credentials or private user data. The complete screenshot inventory and capture context are available in the [screenshot documentation](screenshots/README.md).
+
+<table>
+  <tr>
+    <td align="center" valign="top">
+      <img src="screenshots/prediction-dashboard-mobile.png" alt="Mobile prediction-entry dashboard" width="320"><br>
+      <sub><strong>Prediction dashboard:</strong> responsive prediction workflow, dynamic filtering, and competition/pool context.</sub>
+    </td>
+    <td align="center" valign="top">
+      <img src="screenshots/sealed-predictions-mobile.png" alt="Mobile finalized matches with sealed predictions" width="320"><br>
+      <sub><strong>Sealed predictions:</strong> finalized match state, scoring feedback, and locked prediction presentation.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top">
+      <img src="screenshots/ranking-general-mobile.png" alt="Mobile anonymized general ranking" width="320"><br>
+      <sub><strong>General ranking:</strong> ranking engine output, points aggregation, multiplier visibility, and participant position.</sub>
+    </td>
+    <td align="center" valign="top">
+      <img src="screenshots/match-maintenance-mobile.png" alt="Mobile administrative match-maintenance screen" width="320"><br>
+      <sub><strong>Match maintenance:</strong> administrative lifecycle management, matchday controls, operational counts, and back-office workflow.</sub>
+    </td>
+  </tr>
+</table>
+
 ## Technology stack
 
 - **Backend:** PHP application and business-rule services
@@ -122,7 +149,7 @@ Decision records and trade-offs are in [Engineering decisions](docs/09-engineeri
 docs/         Product, architecture, domain, security, AI workflow, decisions, roadmap
 diagrams/     Mermaid views of architecture, data flow, and prediction lifecycle
 samples/      Illustrative PHP, SQL, JavaScript, and conceptual schema
-screenshots/  Capture plan; no fabricated product imagery
+screenshots/  Sanitized product captures and screenshot documentation
 ```
 
 Start with the [product overview](docs/01-product-overview.md), then follow the numbered documents. All samples are illustrative and deliberately independent of private production code.
